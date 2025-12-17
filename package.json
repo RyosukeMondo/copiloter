@@ -1,0 +1,13 @@
+{
+    "name": "copiloter",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "node reload-server.js",
+        "server": "cd server && npm run dev -- --port 3001"
+    },
+    "devDependencies": {
+        "chokidar": "^3.5.3",
+        "ws": "^8.14.0"
+    }
+}

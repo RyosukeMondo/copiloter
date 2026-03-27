@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface Message {
     role: "user" | "assistant";
@@ -116,21 +117,11 @@ export default function Home() {
                                 >
                                     <strong>{msg.role === "user" ? "You" : "Copilot"}:</strong>
                                     {showRawHtml && msg.rawHtml ? (
-                                        <div
-                                            className="raw-html-content"
-                                            dangerouslySetInnerHTML={{ __html: msg.rawHtml }}
-                                        />
+                                        <SanitizedHtml html={msg.rawHtml} />
                                     ) : (
-                                        <div
-                                            style={{ whiteSpace: "pre-wrap" }}
-                                            dangerouslySetInnerHTML={{
-                                                __html: msg.content
-                                                    .replace(/&/g, '&amp;')
-                                                    .replace(/</g, '&lt;')
-                                                    .replace(/>/g, '&gt;')
-                                                    .replace(/\n/g, '<br/>')
-                                            }}
-                                        />
+                                        <div style={{ whiteSpace: "pre-wrap" }}>
+                                            {msg.content}
+                                        </div>
                                     )}
                                 </div>
                             ))}
@@ -180,5 +171,18 @@ export default function Home() {
                 </div>
             )}
         </div>
+    );
+}
+
+/**
+ * Renders HTML through an allowlist sanitizer to prevent XSS.
+ */
+function SanitizedHtml({ html }: { html: string }) {
+    const clean = useMemo(() => sanitizeHtml(html), [html]);
+    return (
+        <div
+            className="raw-html-content"
+            dangerouslySetInnerHTML={{ __html: clean }}
+        />
     );
 }

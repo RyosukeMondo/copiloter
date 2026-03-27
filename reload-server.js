@@ -1,7 +1,7 @@
 /**
  * Hot Reload Server for Chrome Extension
  * Run with: node reload-server.js
- * 
+ *
  * Watches for file changes and notifies the extension to reload
  */
 
@@ -23,6 +23,19 @@ wss.on("connection", (ws) => {
         clients.delete(ws);
         console.log(`[HMR] Extension disconnected (${clients.size} clients)`);
     });
+
+    ws.on("error", (err) => {
+        console.error(`[HMR] Client WebSocket error: ${err.message}`);
+        clients.delete(ws);
+    });
+});
+
+wss.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+        console.error(`[HMR] Port ${PORT} is already in use. Is another instance running?`);
+        process.exit(1);
+    }
+    console.error(`[HMR] WebSocket server error: ${err.message}`);
 });
 
 // Watch extension files
@@ -43,6 +56,10 @@ watcher.on("change", (filePath) => {
             }
         });
     }, 300);
+});
+
+watcher.on("error", (err) => {
+    console.error(`[HMR] File watcher error: ${err.message}`);
 });
 
 console.log(`[HMR] Reload server running on ws://localhost:${PORT}`);
